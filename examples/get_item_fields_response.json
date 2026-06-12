@@ -1,0 +1,462 @@
+{
+  "editableFields": [
+    {
+      "fieldId": 76,
+      "name": "Parent",
+      "values": [
+        {
+          "id": 27643,
+          "name": "Test Run for Test Set Testing for Test Run Configurations",
+          "type": "TrackerItemReference",
+          "commonItemId": 27643
+        }
+      ],
+      "sharedFieldNames": [],
+      "type": "ChoiceFieldValue"
+    },
+    {
+      "fieldId": 11,
+      "name": "Running Time",
+      "value": 32000,
+      "sharedFieldNames": [],
+      "type": "DurationFieldValue"
+    },
+    {
+      "fieldId": 14,
+      "name": "Reported as",
+      "values": [
+        {
+          "id": 27655,
+          "name": "Bug for \"Test Requirement 8\"",
+          "type": "TrackerItemReference",
+          "commonItemId": 27655,
+          "angularIcon": "bug_report",
+          "iconColor": "#b31317",
+          "propagateSuspects": false,
+          "trackerKey": "BUG",
+          "trackerTypeId": 16,
+          "uri": "/issue/27655",
+          "referenceData": {
+            "suspectPropagation": "DO_NOT_PROPAGATE"
+          }
+        }
+      ],
+      "sharedFieldNames": [],
+      "type": "ChoiceFieldValue"
+    },
+    {
+      "fieldId": 88,
+      "name": "Attachments",
+      "values": [
+        {
+          "id": 108269,
+          "name": "Test management deliverables.txt",
+          "type": "AttachmentReference"
+        }
+      ],
+      "sharedFieldNames": [],
+      "type": "ChoiceFieldValue"
+    },
+    {
+      "fieldId": 79,
+      "name": "Children",
+      "values": [],
+      "sharedFieldNames": [],
+      "type": "ChoiceFieldValue"
+    },
+    {
+      "fieldId": 1000,
+      "name": "Test Run Evidence",
+      "values": [],
+      "sharedFieldNames": [],
+      "type": "ChoiceFieldValue"
+    }
+  ],
+  "readOnlyFields": [
+    {
+      "fieldId": 0,
+      "name": "ID",
+      "value": 27651,
+      "sharedFieldNames": [],
+      "type": "IntegerFieldValue"
+    },
+    {
+      "fieldId": 1,
+      "name": "Tracker",
+      "values": [
+        {
+          "id": 107933,
+          "name": "MR Test Run",
+          "type": "TrackerReference"
+        }
+      ],
+      "sharedFieldNames": [],
+      "type": "ChoiceFieldValue"
+    },
+    {
+      "fieldId": 17,
+      "name": "Test Set",
+      "values": [
+        {
+          "id": 27639,
+          "name": "Test Set Testing for Test Run Configurations",
+          "type": "TrackerItemReference",
+          "commonItemId": 27639,
+          "angularIcon": "widgets",
+          "iconColor": "#b31317",
+          "propagateSuspects": false,
+          "trackerKey": "TESTSET",
+          "trackerTypeId": 16,
+          "uri": "/item/27639",
+          "referenceData": {
+            "suspectPropagation": "DO_NOT_PROPAGATE"
+          }
+        }
+      ],
+      "sharedFieldNames": [],
+      "type": "ChoiceFieldValue"
+    },
+    {
+      "fieldId": 2,
+      "name": "Priority",
+      "values": [
+        {
+          "id": 3,
+          "name": "Normal",
+          "type": "ChoiceOptionReference"
+        }
+      ],
+      "sharedFieldNames": [],
+      "type": "ChoiceFieldValue"
+    },
+    {
+      "fieldId": 3,
+      "name": "Name",
+      "value": "Run of Test Requirement 8",
+      "sharedFieldNames": [],
+      "type": "TextFieldValue"
+    },
+    {
+      "fieldId": 7,
+      "name": "Status",
+      "values": [
+        {
+          "id": 4,
+          "name": "Finished",
+          "type": "ChoiceOptionReference"
+        }
+      ],
+      "sharedFieldNames": [],
+      "type": "ChoiceFieldValue"
+    },
+    {
+      "fieldId": 15,
+      "name": "Result",
+      "values": [
+        {
+          "id": 2,
+          "name": "Failed",
+          "type": "ChoiceOptionReference"
+        }
+      ],
+      "sharedFieldNames": [],
+      "type": "ChoiceFieldValue"
+    },
+    {
+      "fieldId": 81,
+      "name": "Completed at",
+      "value": "2026-03-27T10:04:48.351",
+      "sharedFieldNames": [],
+      "type": "DateFieldValue"
+    },
+    {
+      "fieldId": 31,
+      "name": "Release",
+      "values": [
+        {
+          "id": 14728,
+          "name": "EPIQ 13",
+          "type": "TrackerItemReference",
+          "commonItemId": 14728,
+          "angularIcon": "train",
+          "iconColor": "#ababab",
+          "propagateSuspects": false,
+          "trackerKey": "RELEASE",
+          "trackerTypeId": 16,
+          "uri": "/item/14728",
+          "referenceData": {
+            "suspectPropagation": "DO_NOT_PROPAGATE"
+          }
+        }
+      ],
+      "sharedFieldNames": [],
+      "type": "ChoiceFieldValue"
+    },
+    {
+      "fieldId": 16,
+      "name": "Test Configuration",
+      "values": [
+        {
+          "id": 27641,
+          "name": "Test Configurations Test",
+          "type": "TrackerItemReference",
+          "commonItemId": 27641,
+          "angularIcon": "settings",
+          "iconColor": "#b31317",
+          "propagateSuspects": false,
+          "trackerKey": "TESTCONF",
+          "trackerTypeId": 16,
+          "uri": "/item/27641",
+          "referenceData": {
+            "suspectPropagation": "DO_NOT_PROPAGATE"
+          }
+        }
+      ],
+      "sharedFieldNames": [],
+      "type": "ChoiceFieldValue"
+    },
+    {
+      "fieldId": 10001,
+      "name": "Build",
+      "sharedFieldNames": [],
+      "type": "TextFieldValue"
+    },
+    {
+      "fieldId": 6,
+      "name": "Submitted by",
+      "values": [
+        {
+          "id": 1,
+          "name": "samohan",
+          "type": "UserReference",
+          "email": "samohan@ptc.com",
+          "displayName": "samohan"
+        }
+      ],
+      "sharedFieldNames": [],
+      "type": "ChoiceFieldValue"
+    },
+    {
+      "fieldId": 75,
+      "name": "Modified by",
+      "values": [
+        {
+          "id": 1,
+          "name": "samohan",
+          "type": "UserReference",
+          "email": "samohan@ptc.com",
+          "displayName": "samohan"
+        }
+      ],
+      "sharedFieldNames": [],
+      "type": "ChoiceFieldValue"
+    },
+    {
+      "fieldId": 5,
+      "name": "Assigned to",
+      "values": [
+        {
+          "id": 1,
+          "name": "samohan",
+          "type": "UserReference",
+          "email": "samohan@ptc.com",
+          "displayName": "samohan"
+        }
+      ],
+      "sharedFieldNames": [],
+      "type": "ChoiceFieldValue"
+    },
+    {
+      "fieldId": 4,
+      "name": "Submitted at",
+      "value": "2026-03-27T10:03:00.080",
+      "sharedFieldNames": [],
+      "type": "DateFieldValue"
+    },
+    {
+      "fieldId": 74,
+      "name": "Modified at",
+      "value": "2026-03-27T10:09:22.164",
+      "sharedFieldNames": [],
+      "type": "DateFieldValue"
+    },
+    {
+      "fieldId": 10000,
+      "name": "Sequential",
+      "value": false,
+      "sharedFieldNames": [],
+      "type": "BoolFieldValue"
+    },
+    {
+      "fieldId": 10002,
+      "name": "Run only Accepted TestCases",
+      "value": false,
+      "sharedFieldNames": [],
+      "type": "BoolFieldValue"
+    },
+    {
+      "fieldId": 18,
+      "name": "Accrued Effort",
+      "sharedFieldNames": [],
+      "type": "DurationFieldValue"
+    },
+    {
+      "fieldId": 38,
+      "name": "Formality",
+      "values": [
+        {
+          "id": 1,
+          "name": "Regular",
+          "type": "ChoiceOptionReference"
+        }
+      ],
+      "sharedFieldNames": [],
+      "type": "ChoiceFieldValue"
+    },
+    {
+      "fieldId": 80,
+      "name": "Description",
+      "value": "This ended with Bugs. Check them.\r\n//TEST_CASE_INDEX:3",
+      "sharedFieldNames": [],
+      "type": "WikiTextFieldValue"
+    },
+    {
+      "fieldId": 84,
+      "name": "Description Format",
+      "value": "W",
+      "sharedFieldNames": [],
+      "type": "TextFieldValue"
+    }
+  ],
+  "readOnlyTableFields": [
+    {
+      "fieldId": 1000000,
+      "name": "Test Cases",
+      "values": [
+        [
+          {
+            "fieldId": 1000001,
+            "name": "Test Case",
+            "values": [
+              {
+                "id": 27567,
+                "name": "Test Requirement 8",
+                "type": "TrackerItemReference",
+                "commonItemId": 27567,
+                "angularIcon": "gps_fixed",
+                "iconColor": "#b31317",
+                "propagateSuspects": false,
+                "trackerKey": "MRTC",
+                "trackerTypeId": 16,
+                "uri": "/item/27567",
+                "referenceData": {
+                  "suspectPropagation": "DO_NOT_PROPAGATE"
+                }
+              }
+            ],
+            "sharedFieldNames": [],
+            "type": "ChoiceFieldValue"
+          }
+        ]
+      ],
+      "type": "TableFieldValue"
+    },
+    {
+      "fieldId": 2000000,
+      "name": "Test Step Results",
+      "values": [
+        [
+          {
+            "fieldId": 2000001,
+            "name": "Action",
+            "value": "Test step 1",
+            "sharedFieldNames": [],
+            "type": "WikiTextFieldValue"
+          },
+          {
+            "fieldId": 2000003,
+            "name": "Critical",
+            "value": false,
+            "sharedFieldNames": [],
+            "type": "BoolFieldValue"
+          },
+          {
+            "fieldId": 2000005,
+            "name": "Result",
+            "value": "FAILED",
+            "sharedFieldNames": [],
+            "type": "TextFieldValue"
+          },
+          {
+            "fieldId": 2000006,
+            "name": "Run by",
+            "values": [
+              {
+                "id": 1,
+                "name": "samohan",
+                "type": "UserReference",
+                "email": "samohan@ptc.com",
+                "displayName": "samohan"
+              }
+            ],
+            "sharedFieldNames": [],
+            "type": "ChoiceFieldValue"
+          },
+          {
+            "fieldId": 2000007,
+            "name": "Run at",
+            "value": "2026-03-27T10:04:21.000",
+            "sharedFieldNames": [],
+            "type": "DateFieldValue"
+          }
+        ],
+        [
+          {
+            "fieldId": 2000001,
+            "name": "Action",
+            "value": "Test step 2",
+            "sharedFieldNames": [],
+            "type": "WikiTextFieldValue"
+          },
+          {
+            "fieldId": 2000003,
+            "name": "Critical",
+            "value": false,
+            "sharedFieldNames": [],
+            "type": "BoolFieldValue"
+          },
+          {
+            "fieldId": 2000005,
+            "name": "Result",
+            "value": "PASSED",
+            "sharedFieldNames": [],
+            "type": "TextFieldValue"
+          },
+          {
+            "fieldId": 2000006,
+            "name": "Run by",
+            "values": [
+              {
+                "id": 1,
+                "name": "samohan",
+                "type": "UserReference",
+                "email": "samohan@ptc.com",
+                "displayName": "samohan"
+              }
+            ],
+            "sharedFieldNames": [],
+            "type": "ChoiceFieldValue"
+          },
+          {
+            "fieldId": 2000007,
+            "name": "Run at",
+            "value": "2026-03-27T10:04:24.000",
+            "sharedFieldNames": [],
+            "type": "DateFieldValue"
+          }
+        ]
+      ],
+      "type": "TableFieldValue"
+    }
+  ]
+}

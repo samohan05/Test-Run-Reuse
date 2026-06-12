@@ -1,0 +1,101 @@
+{
+  "tableValues": [
+    {
+      "fieldId": 2000000,
+      "name": "Test Step Results",
+      "values": [
+        [
+          {
+            "fieldId": 2000001,
+            "name": "Action",
+            "value": "Test step 1",
+            "sharedFieldNames": [],
+            "type": "WikiTextFieldValue"
+          },
+          {
+            "fieldId": 2000003,
+            "name": "Critical",
+            "value": false,
+            "sharedFieldNames": [],
+            "type": "BoolFieldValue"
+          },
+          {
+            "fieldId": 2000005,
+            "name": "Result",
+            "value": "FAILED",
+            "sharedFieldNames": [],
+            "type": "TextFieldValue"
+          },
+          {
+            "fieldId": 2000006,
+            "name": "Run by",
+            "values": [
+              {
+                "id": 1,
+                "name": "samohan",
+                "type": "UserReference",
+                "email": "samohan@ptc.com",
+                "displayName": "samohan"
+              }
+            ],
+            "sharedFieldNames": [],
+            "type": "ChoiceFieldValue"
+          },
+          {
+            "fieldId": 2000007,
+            "name": "Run at",
+            "value": "2026-03-27T10:04:21.000",
+            "sharedFieldNames": [],
+            "type": "DateFieldValue"
+          }
+        ],
+        [
+          {
+            "fieldId": 2000001,
+            "name": "Action",
+            "value": "Test step 2",
+            "sharedFieldNames": [],
+            "type": "WikiTextFieldValue"
+          },
+          {
+            "fieldId": 2000003,
+            "name": "Critical",
+            "value": false,
+            "sharedFieldNames": [],
+            "type": "BoolFieldValue"
+          },
+          {
+            "fieldId": 2000005,
+            "name": "Result",
+            "value": "PASSED",
+            "sharedFieldNames": [],
+            "type": "TextFieldValue"
+          },
+          {
+            "fieldId": 2000006,
+            "name": "Run by",
+            "values": [
+              {
+                "id": 1,
+                "name": "samohan",
+                "type": "UserReference",
+                "email": "samohan@ptc.com",
+                "displayName": "samohan"
+              }
+            ],
+            "sharedFieldNames": [],
+            "type": "ChoiceFieldValue"
+          },
+          {
+            "fieldId": 2000007,
+            "name": "Run at",
+            "value": "2026-03-27T10:04:24.000",
+            "sharedFieldNames": [],
+            "type": "DateFieldValue"
+          }
+        ]
+      ],
+      "type": "TableFieldValue"
+    }
+  ]
+}
