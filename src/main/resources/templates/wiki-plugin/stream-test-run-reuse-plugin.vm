@@ -1,0 +1,128 @@
+<div class="stream-reuse-report">
+  <h2>Stream Test Run Reuse</h2>
+
+  <div class="information">
+    <b>Status:</b> $!report.status
+    &nbsp; <b>Mode:</b> $!report.reuseMode
+    &nbsp; <b>Dry run:</b> $!report.dryRun<br/>
+    <b>Operation ID:</b> $!report.operationId
+    #if($report.operationKey)
+      &nbsp; <b>Operation key:</b> $!report.operationKey
+    #end
+  </div>
+
+  <h3>Selection scope</h3>
+  <table class="displaytag">
+    <tbody>
+      <tr>
+        <th>Scope</th>
+        <td>$!report.selectionScope</td>
+      </tr>
+      <tr>
+        <th>Requested target Test Case IDs</th>
+        <td>
+          #if($report.requestedTargetTestCaseIds && !$report.requestedTargetTestCaseIds.isEmpty())
+            $report.requestedTargetTestCaseIds
+          #else
+            Not specified - all matched Test Cases
+          #end
+        </td>
+      </tr>
+      <tr>
+        <th>Requested unique target Test Cases</th>
+        <td>$!report.requestedTargetTestCaseCount</td>
+      </tr>
+      <tr>
+        <th>Resolved requested target Test Cases</th>
+        <td>$!report.resolvedRequestedTargetTestCases</td>
+      </tr>
+      <tr>
+        <th>Invalid requested target Test Cases</th>
+        <td>$!report.invalidRequestedTargetTestCases</td>
+      </tr>
+      <tr>
+        <th>Duplicate requested IDs ignored</th>
+        <td>$!report.duplicateRequestedTargetIdCount</td>
+      </tr>
+    </tbody>
+  </table>
+
+  #if($report.selectionValidationMessages && !$report.selectionValidationMessages.isEmpty())
+    <div class="warning">
+      <b>Selection validation details</b>
+      <ul>
+        #foreach($validationMessage in $report.selectionValidationMessages)
+          <li>$!validationMessage</li>
+        #end
+      </ul>
+    </div>
+  #end
+
+  <h3>Source and target</h3>
+  <table class="displaytag">
+    <thead>
+      <tr><th>Entity</th><th>Source</th><th>Target</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Stream</td>
+        <td>$!report.sourceStream.name (#$!report.sourceStream.id)</td>
+        <td>$!report.targetStream.name (#$!report.targetStream.id)</td>
+      </tr>
+      <tr>
+        <td>Test Case tracker</td>
+        <td>$!report.sourceTestCaseTracker.name (#$!report.sourceTestCaseTracker.id)</td>
+        <td>$!report.targetTestCaseTracker.name (#$!report.targetTestCaseTracker.id)</td>
+      </tr>
+      <tr>
+        <td>Test Run tracker</td>
+        <td>$!report.sourceTestRunTracker.name (#$!report.sourceTestRunTracker.id)</td>
+        <td>$!report.targetTestRunTracker.name (#$!report.targetTestRunTracker.id) - $!report.targetRunTrackerResolution</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>Summary</h3>
+  <table class="displaytag">
+    <tbody>
+      <tr><th>Source Test Cases scanned</th><td>$!report.sourceTestCasesScanned</td><th>Matched</th><td>$!report.matchedTestCases</td></tr>
+      <tr><th>Missing source/target variants</th><td>$!report.missingTargets</td><th>Ambiguous variants</th><td>$!report.ambiguousTargets</td></tr>
+      <tr><th>Without runs</th><td>$!report.testCasesWithoutRuns</td><th>Eligible runs</th><td>$!report.eligibleRuns</td></tr>
+      <tr><th>Selected runs</th><td>$!report.selectedRuns</td><th>Planned copies</th><td>$!report.plannedCopies</td></tr>
+      <tr><th>Already reused</th><td>$!report.alreadyReused</td><th>Created</th><td>$!report.createdCopies</td></tr>
+      <tr><th>Failed</th><td>$!report.failedCopies</td><th></th><td></td></tr>
+    </tbody>
+  </table>
+
+  <p>$!report.message</p>
+
+  <h3>Item-level results</h3>
+  <table class="displaytag">
+    <thead>
+      <tr>
+        <th>Source Test Case</th>
+        <th>Target Test Case</th>
+        <th>Source Run</th>
+        <th>Evidence</th>
+        <th>Action</th>
+        <th>Copied Run / Reason</th>
+      </tr>
+    </thead>
+    <tbody>
+      #foreach($row in $report.results)
+        <tr>
+          <td>$!row.sourceTestCaseName (#$!row.sourceTestCaseId)</td>
+          <td>$!row.targetTestCaseName (#$!row.targetTestCaseId)</td>
+          <td>$!row.sourceRunName (#$!row.sourceRunId)</td>
+          <td>$!row.evidenceStrategy $!row.effectiveEvidenceIds</td>
+          <td>$!row.action</td>
+          <td>#if($row.copiedRunId)#$row.copiedRunId#else$!row.reason#end</td>
+        </tr>
+      #end
+    </tbody>
+  </table>
+
+  #if(!$report.dryRun && $report.operationId)
+    <p>Refresh status: <code>$contextPath/custom/stream-test-run-reuse/status/$report.operationId</code></p>
+  #end
+</div>

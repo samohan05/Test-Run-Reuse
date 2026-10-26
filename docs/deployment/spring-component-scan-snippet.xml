@@ -1,0 +1,24 @@
+<!--
+    Merge this into your SINGLE customer Spring customization context
+    (typically <CB_WEBAPP>/WEB-INF/classes/my-applicationContext.xml).
+
+    Do not create a second <beans> file for this - Codebeamer's customer
+    context must remain exactly one beans root document. If your context
+    already declares the "context" namespace/schema for another
+    customization, just add the <context:component-scan> line below to the
+    existing <beans> element instead of copying the header again.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- Discovers every @Component/@Configuration bean in streamreuse: -->
+    <context:component-scan
+            base-package="com.intland.codebeamer.wiki.plugins.streamreuse"/>
+
+</beans>

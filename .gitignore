@@ -4,10 +4,18 @@
 *.pat
 secrets*
 
-# OS / editor cruft
+# Maven
+target/
+*.class
+
+# Vendor/proprietary jars - see libs/README.md
+libs/*.jar
+
+# OS / editor
 .DS_Store
 Thumbs.db
 desktop.ini
 *.swp
 .idea/
+*.iml
 .vscode/

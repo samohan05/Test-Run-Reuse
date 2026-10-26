@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.philips.codebeamer.custom</groupId>
+    <artifactId>stream-test-run-reuse-plugin</artifactId>
+    <version>1.1.0</version>
+    <packaging>jar</packaging>
+    <name>Stream Test Run Reuse - Codebeamer Wiki Plug-in</name>
+
+    <!--
+      This module compiles ONLY the StreamTestRunReusePlugin sources.
+      It is intentionally self-contained: the jar it produces still needs
+      to be merged (or deployed alongside) your site's own customization
+      jar, because the proprietary Codebeamer libraries below are supplied
+      as system-scoped dependencies from your own installation - they are
+      NOT published to Maven Central and are NOT included in this
+      repository. See libs/README.md for how to populate ${libs.dir}.
+    -->
+    <properties>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
+        <!-- Codebeamer 3.2.0.2 runs on Java 17+ (Spring 6 requirement).
+             Target 11 bytecode loads fine on the 17/21 runtime. -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <cb.version>3.2.0.2</cb.version>
+        <libs.dir>${project.basedir}/libs</libs.dir>
+    </properties>
+
+    <dependencies>
+        <!-- Codebeamer 3.2.0.2 core - copy these three jars from your own
+             <CB_INSTALL>/tomcat/webapps/cb/WEB-INF/lib/ into libs/ -->
+        <dependency>
+            <groupId>com.codebeamer</groupId>
+            <artifactId>cb</artifactId>
+            <version>${cb.version}</version>
+            <scope>system</scope>
+            <systemPath>${libs.dir}/cb-${cb.version}.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.codebeamer</groupId>
+            <artifactId>cb-common</artifactId>
+            <version>${cb.version}</version>
+            <scope>system</scope>
+            <systemPath>${libs.dir}/cb-common-${cb.version}.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.codebeamer</groupId>
+            <artifactId>cb-jsp-wiki</artifactId>
+            <version>${cb.version}</version>
+            <scope>system</scope>
+            <systemPath>${libs.dir}/cb-jsp-wiki-${cb.version}.jar</systemPath>
+        </dependency>
+
+        <!-- Spring 6.2.x (matches the 3.2.0.2 install's own Spring version) -->
+        <dependency>
+            <groupId>org.springframework</groupId><artifactId>spring-beans</artifactId>
+            <version>6.2.17</version><scope>system</scope>
+            <systemPath>${libs.dir}/spring-beans-6.2.17.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId><artifactId>spring-context</artifactId>
+            <version>6.2.17</version><scope>system</scope>
+            <systemPath>${libs.dir}/spring-context-6.2.17.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId><artifactId>spring-core</artifactId>
+            <version>6.2.17</version><scope>system</scope>
+            <systemPath>${libs.dir}/spring-core-6.2.17.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId><artifactId>spring-aop</artifactId>
+            <version>6.2.17</version><scope>system</scope>
+            <systemPath>${libs.dir}/spring-aop-6.2.17.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId><artifactId>spring-expression</artifactId>
+            <version>6.2.17</version><scope>system</scope>
+            <systemPath>${libs.dir}/spring-expression-6.2.17.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId><artifactId>spring-jcl</artifactId>
+            <version>6.2.17</version><scope>system</scope>
+            <systemPath>${libs.dir}/spring-jcl-6.2.17.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId><artifactId>spring-tx</artifactId>
+            <version>6.2.17</version><scope>system</scope>
+            <systemPath>${libs.dir}/spring-tx-6.2.17.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId><artifactId>spring-web</artifactId>
+            <version>6.2.17</version><scope>system</scope>
+            <systemPath>${libs.dir}/spring-web-6.2.17.jar</systemPath>
+        </dependency>
+
+        <!-- Servlet API: Jakarta (Tomcat 10 / Jakarta EE 9+), provided at runtime by Tomcat -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId><artifactId>jakarta.servlet-api</artifactId>
+            <version>6.0.0</version><scope>system</scope>
+            <systemPath>${libs.dir}/jakarta.servlet-api.jar</systemPath>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId><artifactId>log4j-api</artifactId>
+            <version>2.25.0</version><scope>system</scope>
+            <systemPath>${libs.dir}/log4j-api-2.25.0.jar</systemPath>
+        </dependency>
+
+        <!-- JSON (CodebeamerV3StreamMetadataClient reads the Stream API's JSON) -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-databind</artifactId>
+            <version>2.19.2</version><scope>system</scope>
+            <systemPath>${libs.dir}/jackson-databind-2.19.2.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-annotations</artifactId>
+            <version>2.19.2</version><scope>system</scope>
+            <systemPath>${libs.dir}/jackson-annotations-2.19.2.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId><artifactId>jackson-core</artifactId>
+            <version>2.19.2</version><scope>system</scope>
+            <systemPath>${libs.dir}/jackson-core-2.19.2.jar</systemPath>
+        </dependency>
+
+        <!-- Velocity (the Wiki plug-in renders stream-test-run-reuse-plugin.vm) -->
+        <dependency>
+            <groupId>org.apache.velocity</groupId><artifactId>velocity-engine-core</artifactId>
+            <version>2.3</version><scope>system</scope>
+            <systemPath>${libs.dir}/velocity-engine-core-2.3.jar</systemPath>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <finalName>${project.artifactId}-${project.version}</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <source>11</source>
+                    <target>11</target>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.1</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>
