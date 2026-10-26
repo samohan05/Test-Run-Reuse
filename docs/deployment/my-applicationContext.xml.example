@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    EXAMPLE - this is the actual customer Spring customization context from a
+    live deployment of this plug-in, included here as a real-world reference
+    for where the <context:component-scan> entry goes.
+
+    Back up this file before upgrading Codebeamer. Restore it after the
+    upgrade and review all custom beans for release compatibility.
+
+    NOTE: the two beans below (abstractToolMenuRendererTemplate and
+    projectImportActionMenuBuilder) belong to OTHER, unrelated Philips
+    customizations on this site. They are included only because this is the
+    real deployed file - do not copy them into your own context unless you
+    are also deploying those other customizations. The only entry this
+    plug-in needs is the <context:component-scan> element; see
+    docs/deployment/spring-component-scan-snippet.xml for a minimal,
+    plugin-only version of the same change.
+-->
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context
+           http://www.springframework.org/schema/context/spring-context.xsd"
+       default-lazy-init="true">
+
+    <!--
+        Discover the Stream Test Run Reuse components.
+        The namespace declaration and context schema above are mandatory
+        whenever context:component-scan is used.
+    -->
+    <context:component-scan
+            base-package="com.intland.codebeamer.wiki.plugins.streamreuse"/>
+
+    <!-- The beans below are unrelated to Stream Test Run Reuse (see note above). -->
+
+    <bean id="abstractToolMenuRendererTemplate"
+          abstract="true"
+          class="com.intland.codebeamer.ui.view.ExtendableToolMenuRenderer"/>
+
+    <bean id="projectImportActionMenuBuilder"
+          class="com.intland.codebeamer.ui.view.actionmenubuilder.ExtendableProjectImportActionMenuBuilder"
+          lazy-init="false"/>
+
+</beans>

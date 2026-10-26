@@ -422,9 +422,25 @@ wrong tracker, `sourceStreamId == targetStreamId`, an invalid `reuseMode`, or
 
 | Artifact | Deploys to |
 |---|---|
-| The compiled customization jar (this module's classes merged into, or alongside, your site's customization jar) | `<CB_WEBAPP>/WEB-INF/lib/` |
+| The compiled customization jar (this module's classes merged into, or alongside, your site's customization jar — see [Building from source](#building-from-source) for a ready-to-use standalone build) | `<CB_WEBAPP>/WEB-INF/lib/` |
 | [`stream-test-run-reuse-plugin.vm`](src/main/resources/templates/wiki-plugin/stream-test-run-reuse-plugin.vm) | `<CB_WEBAPP>/config/templates/wiki-plugin/` |
-| [`docs/deployment/spring-component-scan-snippet.xml`](docs/deployment/spring-component-scan-snippet.xml) | merge into your **single** customer Spring context, typically `<CB_WEBAPP>/WEB-INF/classes/my-applicationContext.xml` |
+| The `<context:component-scan>` entry below | merge into your **single** customer Spring context, typically `<CB_WEBAPP>/WEB-INF/classes/my-applicationContext.xml` |
+
+An entry in `my-applicationContext.xml` is required for Spring to discover this plug-in's
+`@Component`/`@Configuration` beans — without it, the application still starts, but every
+Wiki invocation fails with "The Codebeamer application context is unavailable" or a
+`NoSuchBeanDefinitionException` for `StreamReuseFacade`. Two reference versions are provided:
+
+- [`docs/deployment/spring-component-scan-snippet.xml`](docs/deployment/spring-component-scan-snippet.xml) —
+  the minimal change, containing only what this plug-in needs. Use this as the template for
+  merging into your own context.
+- [`docs/deployment/my-applicationContext.xml.example`](docs/deployment/my-applicationContext.xml.example) —
+  a real, deployed `my-applicationContext.xml` from a live site running this plug-in,
+  included as a concrete worked example of what the finished file looks like. It also
+  contains two beans for *other*, unrelated Philips customizations on that site — don't copy
+  those unless you're deploying those customizations too; only the
+  `<context:component-scan base-package="com.intland.codebeamer.wiki.plugins.streamreuse"/>`
+  element is relevant here.
 
 > **Do not leave two customization jars that both define classes under**
 > **`com.intland.codebeamer.wiki.plugins.streamreuse` on the classpath** — remove or archive
@@ -461,7 +477,9 @@ mvn clean package
 
 See [`libs/README.md`](libs/README.md) for how to populate the system-scoped Codebeamer/Spring
 jars this module compiles against — they are not published to Maven Central and are not part
-of this repository.
+of this repository. This `pom.xml` has been verified to produce a working, self-contained
+`target/stream-test-run-reuse-plugin-1.1.0.jar` (all 18 classes plus the Velocity template)
+once those jars are in place.
 
 ```bash
 # Verify the expected classes are present in the built jar:
@@ -470,6 +488,12 @@ jar tf target/stream-test-run-reuse-plugin-1.1.0.jar | findstr /I "streamreuse S
 # Capture a checksum for your deployment record:
 certutil -hashfile target/stream-test-run-reuse-plugin-1.1.0.jar SHA256
 ```
+
+This jar is self-contained and additive: it only defines classes under
+`com.intland.codebeamer.wiki.plugins(.streamreuse)`, so you can either drop it into
+`WEB-INF/lib/` as its own jar alongside your site's other customization jars, or merge its
+classes into an existing customization jar if your site prefers a single jar. Either way,
+remember the "do not leave two jars defining the same classes" rule above.
 
 ## Validation checklist
 
@@ -551,6 +575,7 @@ processing flow, and recommended future hardening.
 ├── docs/
 │   ├── implementation-guide.md               Full narrative implementation guide
 │   └── deployment/
-│       └── spring-component-scan-snippet.xml Spring XML to merge into your context
+│       ├── spring-component-scan-snippet.xml  Minimal Spring XML to merge into your context
+│       └── my-applicationContext.xml.example  A real deployed context, as a worked example
 └── legacy/                        Superseded Groovy workflow-script version (see legacy/README.md)
 ```

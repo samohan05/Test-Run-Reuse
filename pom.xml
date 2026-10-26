@@ -104,6 +104,18 @@
             <systemPath>${libs.dir}/jakarta.servlet-api.jar</systemPath>
         </dependency>
 
+        <!-- MyBatis-Spring: TrackerManager (cb.jar) extends SqlSessionDaoSupport -->
+        <dependency>
+            <groupId>org.mybatis</groupId><artifactId>mybatis-spring</artifactId>
+            <version>3.0.3</version><scope>system</scope>
+            <systemPath>${libs.dir}/mybatis-spring-3.0.3.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis</groupId><artifactId>mybatis</artifactId>
+            <version>3.5.19.2</version><scope>system</scope>
+            <systemPath>${libs.dir}/mybatis-3.5.19.2.jar</systemPath>
+        </dependency>
+
         <!-- Logging -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId><artifactId>log4j-api</artifactId>
