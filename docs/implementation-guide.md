@@ -1,4 +1,4 @@
-# Stream Test Run Reuse — Implementation Guide (v1.1.0)
+# Stream Test Run Reuse — Implementation Guide (v1.2.0)
 
 This is the full narrative implementation guide for the plug-in documented at a
 quick-reference level in the [repository root README](../README.md). Where the README already
@@ -128,14 +128,19 @@ removes ambiguity when multiple source Test Run trackers exist on the same sourc
 ### 5.2 Target Test Case tracker
 
 The target Test Case tracker is resolved from the source Test Case tracker and the target
-stream using Codebeamer's v3 Stream tracker-variant endpoint:
+stream using the same logic as Codebeamer's Stream tracker-variant endpoint:
 
 ```
-GET /api/v3/streams/<TARGET_STREAM_ID>/trackers/<SOURCE_TRACKER_ID>/variant
+.../streams/<TARGET_STREAM_ID>/trackers/<SOURCE_TRACKER_ID>/variant
 ```
 
-Exactly one target tracker is required; the call is made same-origin, forwarding the
-invoking user's own session cookie (see [§10.1 Security](#101-security)).
+As of v1.2.0 this is **not** an HTTP call — `CodebeamerInternalStreamMetadataClient` invokes
+Codebeamer's own Spring-managed `StreamRestController` bean directly, in-process, still
+passing the active `HttpServletRequest` through so the lookup remains permission-aware for
+the invoking user. (Prior to v1.2.0, `CodebeamerV3StreamMetadataClient` made this call as a
+same-origin HTTP request, forwarding the invoking user's session cookie; see
+[What changed in v1.2.0](../README.md#what-changed-in-v120).) Exactly one target tracker is
+required either way.
 
 ### 5.3 Target Test Run tracker
 
@@ -252,14 +257,19 @@ back successful copies already committed for the same bulk operation. Per copy:
 - No embedded service credentials are used anywhere in this implementation (contrast with
   the [legacy Groovy script](../legacy/README.md), which read a PAT/Basic-auth pair from
   environment variables).
-- Same-origin Stream API calls forward the current session only to the local Codebeamer
-  origin — never to a third-party host.
+- As of v1.2.0, stream/tracker metadata resolution is an in-process call to Codebeamer's own
+  `StreamRestController` bean rather than an HTTP call — there is no network hop and no
+  session cookie to forward at all. The active `HttpServletRequest` is still passed through
+  so the lookup stays scoped to the invoking user's own permissions.
 - Error messages are HTML-escaped before Wiki rendering.
 - Selected target items are validated against the resolved target tracker before anything
   else happens.
 
 ### 10.2 Performance
 
+- As of v1.2.0, stream/tracker variant resolution no longer makes a self-referential HTTP
+  round-trip (removed with `CodebeamerV3StreamMetadataClient`), so it no longer depends on
+  reverse-proxy/hairpin-NAT behavior or the server's own connector port being reachable.
 - Selected-target mode avoids scanning every target Test Case.
 - Full-scope mode currently scans the complete source and target trackers (see
   [Known limitations](../README.md#known-limitations)).
@@ -345,8 +355,8 @@ src/main/java/com/intland/codebeamer/wiki/plugins/
     ├── StreamTestRunReusePlugin.java          Wiki entry point
     ├── StreamReuseParameters.java             parameter parsing & validation
     ├── StreamTrackerResolver.java             stream/tracker resolution
-    ├── StreamMetadataClient.java              Stream API client interface
-    ├── CodebeamerV3StreamMetadataClient.java  Stream API client implementation
+    ├── StreamMetadataClient.java              Stream metadata client interface
+    ├── CodebeamerInternalStreamMetadataClient.java  in-process StreamRestController client
     ├── TestCaseMatcher.java                   commonItemId matching
     ├── TestRunSelector.java                   run indexing & latest/all selection
     ├── EvidencePropagationService.java        Test Run Evidence computation

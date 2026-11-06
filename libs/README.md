@@ -26,3 +26,10 @@ precisely so you can adjust them to match.
 version). Build with a JDK new enough to *read* those class files even though `pom.xml`
 targets bytecode 11 for output — e.g. `cb-3.2.0.2.jar` requires a JDK 21 `javac` to compile
 against; an older JDK fails with `cannot access ... bad class file ... wrong version`.
+
+**Harmless warning:** as of v1.2.0, `CodebeamerInternalStreamMetadataClient` references
+`cb.jar` classes (`StreamRestController`, `TrackerReferenceModel`) that carry
+`io.swagger.v3.oas.annotations.*` annotations. Since no Swagger jar is on this module's
+classpath, `javac` prints `unknown enum constant ... class file ... not found` warnings for
+those annotations. This is expected and does not affect the build or the resulting classes —
+add `swagger-annotations` to `libs/` and `pom.xml` only if you want to silence it.

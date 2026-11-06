@@ -1,4 +1,4 @@
-# Stream Test Run Reuse — Codebeamer Wiki Plug-in (v1.1.0)
+# Stream Test Run Reuse — Codebeamer Wiki Plug-in (v1.2.0)
 
 A server-side **PTC Codebeamer** Wiki plug-in that performs controlled, bulk **Test Run
 result reuse across streams**. Point it at a source stream and a target stream and it finds
@@ -24,6 +24,7 @@ the Initial Stream doesn't have to be re-executed by hand on every branch stream
 
 ## Table of contents
 
+- [What changed in v1.2.0](#what-changed-in-v120)
 - [Why this exists](#why-this-exists)
 - [What it does](#what-it-does)
 - [Architecture](#architecture)
@@ -39,6 +40,30 @@ the Initial Stream doesn't have to be re-executed by hand on every branch stream
 - [Repository layout](#repository-layout)
 
 ---
+
+## What changed in v1.2.0
+
+`CodebeamerV3StreamMetadataClient` (which resolved stream/tracker metadata by making a
+self-referential HTTP call back into Codebeamer's own `/api/v3/streams/...` endpoints,
+forwarding the caller's session cookie) has been replaced by
+[`CodebeamerInternalStreamMetadataClient`](src/main/java/com/intland/codebeamer/wiki/plugins/streamreuse/CodebeamerInternalStreamMetadataClient.java),
+which calls Codebeamer's own Spring-managed `StreamRestController` bean **in-process** instead.
+
+This removes, entirely:
+- the self-referential HTTP call and its latency,
+- base-URL discovery (scheme/host/port reconstruction from the incoming request),
+- a dependency on the connector port Codebeamer happens to be listening on,
+- cookie forwarding, and
+- the reverse-proxy / hairpin-NAT failure mode where a server can't reliably call back into
+  its own public hostname.
+
+It is otherwise behavior-compatible: `StreamTrackerResolver` now wires in the new client via
+`@Qualifier("codebeamerInternalStreamMetadataClient")` (the new client is also `@Primary`),
+but the `StreamMetadataClient` interface, the resolution logic, and the report's
+`STREAM_VARIANT` / `SHARED_TRACKER` / `SHARED_TRACKER_FALLBACK` outcomes are unchanged. No
+Wiki parameters changed. If you're upgrading from v1.1.0, see
+[Deployment](#deployment) — the only new thing to deploy is the jar itself; the Spring
+context entry and `.vm` template are unchanged.
 
 ## Why this exists
 
@@ -104,7 +129,7 @@ Codebeamer Wiki page
   +-- StreamReuseParameters        parses & validates the invocation contract
   |
   +-- StreamTrackerResolver        resolves/validates source+target streams & trackers
-  |     `-- CodebeamerV3StreamMetadataClient   (same-origin calls to /api/v3/streams/...)
+  |     `-- CodebeamerInternalStreamMetadataClient   (in-process call to StreamRestController)
   |
   +-- TestCaseMatcher              builds source<->target Test Case pairs by commonItemId
   |
@@ -127,7 +152,7 @@ Codebeamer Wiki page
 |---|---|---|
 | `StreamTestRunReusePlugin` | Wiki entry point: resolves the current user, loads the Spring context, renders `stream-test-run-reuse-plugin.vm` | No |
 | `StreamReuseParameters` | Parses and validates every Wiki parameter | No |
-| `CodebeamerV3StreamMetadataClient` / `StreamMetadataClient` | Queries the Stream API for stream names and tracker-variant resolution | No |
+| `CodebeamerInternalStreamMetadataClient` / `StreamMetadataClient` | Resolves stream names and tracker-variant metadata by calling Codebeamer's own `StreamRestController` bean directly (no HTTP round-trip) | No |
 | `StreamTrackerResolver` | Resolves source/target streams and the target Test Case / Test Run trackers | No |
 | `TestCaseMatcher` | Matches source and target Test Case variants by `commonItemId` (all-item or selected-target mode) | No |
 | `TestRunSelector` | Indexes Test Run tracker items into executable child runs per Test Case; applies `latest`/`all` | No |
@@ -243,11 +268,13 @@ implementation class. Both classes must be on the deployed classpath.
 | `operationKey` | **Only when `dryRun='false'`** | — | Unique key identifying this execution request. Letters, digits, `.`, `_`, `:`, `-`; max 120 characters. Re-rendering the page with the **same** key returns the existing report instead of submitting a second job. |
 
 The target Test Case tracker and the target Test Run tracker are **not** passed in — they are
-resolved dynamically from `targetStreamId` via Codebeamer's Stream variant API
-(`GET /api/v3/streams/{targetStreamId}/trackers/{sourceTrackerId}/variant`). If that
-resolution for the Test Run tracker doesn't produce a distinct tracker, the plug-in falls
-back to treating the Test Run tracker as **shared** between source and target (this is
-normal/expected when both streams record Test Runs in the same physical tracker).
+resolved dynamically from `targetStreamId` by calling Codebeamer's own
+`StreamRestController` bean in-process (the same logic behind the Stream variant API,
+`.../streams/{targetStreamId}/trackers/{sourceTrackerId}/variant`, invoked directly rather
+than over HTTP — see [What changed in v1.2.0](#what-changed-in-v120)). If that resolution for
+the Test Run tracker doesn't produce a distinct tracker, the plug-in falls back to treating
+the Test Run tracker as **shared** between source and target (this is normal/expected when
+both streams record Test Runs in the same physical tracker).
 
 ## Usage examples
 
@@ -478,15 +505,15 @@ mvn clean package
 See [`libs/README.md`](libs/README.md) for how to populate the system-scoped Codebeamer/Spring
 jars this module compiles against — they are not published to Maven Central and are not part
 of this repository. This `pom.xml` has been verified to produce a working, self-contained
-`target/stream-test-run-reuse-plugin-1.1.0.jar` (all 18 classes plus the Velocity template)
+`target/stream-test-run-reuse-plugin-1.2.0.jar` (all 18 classes plus the Velocity template)
 once those jars are in place.
 
 ```bash
 # Verify the expected classes are present in the built jar:
-jar tf target/stream-test-run-reuse-plugin-1.1.0.jar | findstr /I "streamreuse StreamTestRunReusePlugin"
+jar tf target/stream-test-run-reuse-plugin-1.2.0.jar | findstr /I "streamreuse StreamTestRunReusePlugin"
 
 # Capture a checksum for your deployment record:
-certutil -hashfile target/stream-test-run-reuse-plugin-1.1.0.jar SHA256
+certutil -hashfile target/stream-test-run-reuse-plugin-1.2.0.jar SHA256
 ```
 
 This jar is self-contained and additive: it only defines classes under

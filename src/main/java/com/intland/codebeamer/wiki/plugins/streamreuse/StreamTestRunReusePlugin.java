@@ -1,3 +1,4 @@
+
 package com.intland.codebeamer.wiki.plugins.streamreuse;
 
 import java.util.Map;
@@ -15,7 +16,7 @@ import com.intland.codebeamer.persistence.dto.UserDto;
 import com.intland.codebeamer.wiki.plugins.base.AbstractCodeBeamerWikiPlugin;
 
 /**
- * Wiki entry point for Stream Test Run Reuse V1.
+ * Wiki entry point for Stream Test Run Reuse V1.2.
  */
 public class StreamTestRunReusePlugin extends AbstractCodeBeamerWikiPlugin {
 
@@ -58,7 +59,7 @@ public class StreamTestRunReusePlugin extends AbstractCodeBeamerWikiPlugin {
 
             velocity.put("report", report);
             velocity.put("params", parsed);
-            velocity.put("pluginVersion", "1.0.1");
+            velocity.put("pluginVersion", "1.2.0");
 
             String output =
                     renderPluginTemplate(TEMPLATE_NAME, velocity);

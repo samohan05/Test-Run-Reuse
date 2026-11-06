@@ -7,7 +7,7 @@
 
     <groupId>com.philips.codebeamer.custom</groupId>
     <artifactId>stream-test-run-reuse-plugin</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <packaging>jar</packaging>
     <name>Stream Test Run Reuse - Codebeamer Wiki Plug-in</name>
 

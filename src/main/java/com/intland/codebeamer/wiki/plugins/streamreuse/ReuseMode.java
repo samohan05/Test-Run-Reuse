@@ -1,3 +1,4 @@
+
 package com.intland.codebeamer.wiki.plugins.streamreuse;
 public enum ReuseMode { LATEST, ALL;
     public static ReuseMode parse(String value) {

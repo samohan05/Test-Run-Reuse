@@ -1,3 +1,4 @@
+
 package com.intland.codebeamer.wiki.plugins.streamreuse;
 import jakarta.servlet.http.HttpServletRequest;
 public interface StreamMetadataClient {
