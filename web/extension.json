@@ -1,0 +1,23 @@
+{
+  "dashboardWidgets": [
+    {
+      "enabled": "true",
+      "externalWidgetConfig": {
+        "id": "philips-stream-test-run-reuse-widget",
+        "name": "Stream Test Run Reuse",
+        "shortDescription": "Stream-aware Test Run reuse with linked preview and execution results.",
+        "category": "test",
+        "viewUrl": "http://localhost:8080/cb/custom/streamTestRunReuseWidget.html?v=1.7.4",
+        "iconUrl": "http://localhost:8080/cb/custom/menuitem_submenuindicator.png",
+        "attributes": {
+          "project": {
+            "typeName": "project",
+            "fieldLabel": "Project",
+            "required": true,
+            "value": []
+          }
+        }
+      }
+    }
+  ]
+}
