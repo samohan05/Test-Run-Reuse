@@ -1,4 +1,4 @@
-# Stream Test Run Reuse — Codebeamer Customization (v3.0.0)
+# Stream Test Run Reuse — Codebeamer Customization (v4.0.0)
 
 A server-side **PTC Codebeamer** customization that performs controlled, bulk **Test Run
 result reuse across streams**. Point it at a source stream and a target stream and it finds
@@ -37,6 +37,7 @@ Both front-ends validate every input server-side and delegate to the exact same
 
 ## Table of contents
 
+- [What changed in v4.0.0](#what-changed-in-v400)
 - [What changed in v3.0.0](#what-changed-in-v300)
 - [What changed in v1.2.0](#what-changed-in-v120)
 - [Why this exists](#why-this-exists)
@@ -55,6 +56,58 @@ Both front-ends validate every input server-side and delegate to the exact same
 - [Repository layout](#repository-layout)
 
 ---
+
+## What changed in v4.0.0
+
+This release reworks the Dashboard Widget's execution experience and extends the backend to
+support it — the Wiki plug-in's invocation contract is unchanged.
+
+- **Widget build `1.7.4-linked-results` → `1.7.11-progress-normalization-fix`**
+  ([`web/streamTestRunReuseWidget.html`](web/streamTestRunReuseWidget.html)):
+  - The target Test Case picker is now **server-paged** (200 items/page, with Previous/Next
+    and a "Select all on page" / "Clear all selections" pair) instead of loading up to 500
+    items in one request, and the picker now runs full-screen instead of in a fixed-size modal.
+  - **Execute** now shows a confirmation dialog first — planned copy count, source/target
+    stream names, reuse mode, and an extra warning above 500 planned copies — before calling
+    `/execute`.
+  - A live **progress overlay** during execution: a progress bar, created/already-reused/
+    failed/remaining counts, elapsed time, an estimated-time-remaining calculation, the item
+    currently being processed, and the operation ID.
+  - **Adaptive status polling**: every ~3s for the first 30s, ~5s up to 5 minutes, ~10s beyond
+    that, and ~15s whenever the browser tab is hidden — replacing a fixed ~1.2s poll.
+  - The poller tries the new lean `GET .../status/{operationId}/summary` endpoint first and
+    falls back to the full `GET .../status/{operationId}` report on `404`, so the widget works
+    whether or not a given deployment has the summary endpoint.
+  - The results table gained a filter (All / Created / Already reused / Failed / Planned) and
+    its own pagination (100 rows/page); **Execute** is only enabled while the current filtered
+    view still has plannable (`CREATE`) rows.
+  - `web/extension.json`'s `viewUrl` query string bumped to match (`?v=1.7.11`).
+- **Backend changes that back the progress overlay** (no Wiki-plugin parameter or engine
+  contract change):
+  - `StreamReuseModels.Report` gained live, mutable progress fields — `processedCopies`,
+    `remainingCopies`, `currentSourceRunId`/`currentSourceRunName`,
+    `currentTargetTestCaseId`/`currentTargetTestCaseName`, `lastError`, `lastUpdatedAt` —
+    updated in place by `StreamReuseJob` as each copy is processed, not only once at the end.
+  - `OperationRegistry` gained a lean `ProgressSnapshot` (and `progress(operationId)`) derived
+    from the live report, exposed via `StreamReuseFacade.progress(operationId)`.
+  - `StreamReuseDashboardController` exposes the new snapshot at
+    `GET /cb/api/streamReuse/philips/status/{operationId}/summary` (`404` if the operation is
+    unknown) — the widget's polling optimization above.
+  - `TestRunSelector.indexRuns` now takes the source Test Run tracker ID directly and loads it
+    itself (`indexRuns(int trackerId)`), rather than being handed an already-loaded list by
+    `StreamReusePlanner`; the stage-by-stage `STREAM_REUSE_PERF` timing logging that lived in
+    the planner was removed as part of that move.
+  - `IdempotencyService` changed from a precomputed index built once per request
+    (`buildIndex`) to a lazy per-check lookup (`exists(user, targetRunTrackerId,
+    targetTestCaseId, originIds)`) — functionally equivalent, evaluated on demand instead of
+    up front.
+  - `TestCaseMatcher` and `EvidencePropagationService` are functionally unchanged from v3.0.0
+    (reformatted only).
+- `pom.xml` bumped to `4.0.0`; the consolidated jar now contains 40 classes (up from 26 —
+  the net of the new `ProgressSnapshot` inner class and other small structural changes).
+
+See [`docs/dashboard-widget-implementation-guide.md`](docs/dashboard-widget-implementation-guide.md)
+for the full narrative write-up, including the widget build-history appendix.
 
 ## What changed in v3.0.0
 
@@ -536,7 +589,7 @@ choices made inside the widget, not editor-time attributes:
       "id": "philips-stream-test-run-reuse-widget",
       "name": "Stream Test Run Reuse",
       "category": "test",
-      "viewUrl": "http://localhost:8080/cb/custom/streamTestRunReuseWidget.html?v=1.7.4",
+      "viewUrl": "http://localhost:8080/cb/custom/streamTestRunReuseWidget.html?v=1.7.11",
       "iconUrl": "http://localhost:8080/cb/custom/menuitem_submenuindicator.png",
       "attributes": {
         "project": { "typeName": "project", "fieldLabel": "Project", "required": true, "value": [] }
@@ -562,17 +615,25 @@ cache otherwise keep serving the old file).
    from the source/target choices, and the selected source stream is excluded from the target
    list.
 4. Choose `latest` or `all` run selection, and either **all matched** or a specific set of
-   **selected** target Test Cases via a searchable, filterable, dual-pane picker. Items whose
-   category is `Folder` (category ID `1`, or named "Folder") are excluded client-side — and
-   independently re-rejected server-side by `DashboardRequestValidator` if a crafted request
-   supplies one anyway.
+   **selected** target Test Cases via a searchable, filterable, dual-pane picker — server-paged
+   at 200 items/page. Items whose category is `Folder` (category ID `1`, or named "Folder")
+   are excluded client-side — and independently re-rejected server-side by the matcher if a
+   crafted request supplies one anyway.
 5. **Preview** calls `POST /preview` (`dryRun=true` under the hood) and renders the same
    summary/item-level table described in [Output model](#output-model), with Source Test
    Case, Target Test Case, Source Run, effective evidence IDs, and the project all linked to
-   their Codebeamer pages (`target="_blank" rel="noopener noreferrer"`).
-6. **Execute** is disabled until a current preview reports `plannedCopies > 0`. It generates a
-   unique `operationKey`, calls `POST /execute`, then polls `GET /status/{operationId}` every
-   ~1.2s until a terminal status, updating the same results table in place (the Outcome
+   their Codebeamer pages (`target="_blank" rel="noopener noreferrer"`). The results table can
+   be filtered (All / Created / Already reused / Failed / Planned) and is paginated at 100
+   rows/page.
+6. **Execute** is only enabled while the current filtered view still has plannable (`CREATE`)
+   rows. Clicking it shows a confirmation dialog (planned count, streams, mode — with an extra
+   warning above 500 planned copies), then generates a unique `operationKey`, calls
+   `POST /execute`, and polls for status — preferring the lean
+   `GET /status/{operationId}/summary` endpoint (falling back to the full
+   `GET /status/{operationId}` report on `404`) on an adaptive interval (~3s early, up to ~10s
+   later, ~15s while the tab is hidden) until a terminal status. A live overlay shows a
+   progress bar, created/reused/failed/remaining counts, elapsed/ETA, and the item currently
+   being processed; the results table updates in place when execution completes (the Outcome
    column shows `Created Test Run #<id>` linked, the skip/failure reason, or an em dash).
 
 ### HTTP API
@@ -582,7 +643,8 @@ cache otherwise keep serving the old file).
 | `GET /cb/api/streamReuse/philips/ping` | Health/version probe | Confirms the controller registered under `/streamReuse/philips` rather than accidentally doubling `/api` |
 | `POST /cb/api/streamReuse/philips/preview` | Read-only plan | Maps to `dryRun=true`; same validation as execute |
 | `POST /cb/api/streamReuse/philips/execute` | Queue background execution | Requires a unique `operationKey` (the widget generates one) |
-| `GET /cb/api/streamReuse/philips/status/{operationId}` | Poll an operation | `404` if the ID is unknown |
+| `GET /cb/api/streamReuse/philips/status/{operationId}` | Poll an operation (full report) | `404` if the ID is unknown |
+| `GET /cb/api/streamReuse/philips/status/{operationId}/summary` | Poll an operation (lean progress snapshot) | `404` if the ID is unknown; the widget tries this first and falls back to the full report |
 
 Request body (`preview` and `execute` share the same shape):
 
@@ -707,17 +769,18 @@ mvn clean package
 See [`libs/README.md`](libs/README.md) for how to populate the system-scoped Codebeamer/Spring
 jars this module compiles against — they are not published to Maven Central and are not part
 of this repository. This `pom.xml` has been verified to produce a working, self-contained
-`target/stream-test-run-reuse-plugin-3.0.0.jar` (26 classes: the 18 from the Wiki plug-in and
-engine, plus the 7-class `dashboard` package and one controller inner class, plus the Velocity
-template) once those jars are in place. This jar is Java-only — the widget's HTML/JSON assets
-under `web/` are a separate deployment artifact; see [Deployment](#deployment).
+`target/stream-test-run-reuse-plugin-4.0.0.jar` (40 classes: the Wiki plug-in and engine, the
+`dashboard` package, and the `OperationRegistry.ProgressSnapshot` + other inner classes added in
+[v4.0.0](#what-changed-in-v400)) once those jars are in place. This jar is Java-only — the
+widget's HTML/JSON assets under `web/` are a separate deployment artifact; see
+[Deployment](#deployment).
 
 ```bash
 # Verify the expected classes are present in the built jar:
-jar tf target/stream-test-run-reuse-plugin-3.0.0.jar | findstr /I "streamreuse dashboard StreamTestRunReusePlugin"
+jar tf target/stream-test-run-reuse-plugin-4.0.0.jar | findstr /I "streamreuse dashboard StreamTestRunReusePlugin"
 
 # Capture a checksum for your deployment record:
-certutil -hashfile target/stream-test-run-reuse-plugin-3.0.0.jar SHA256
+certutil -hashfile target/stream-test-run-reuse-plugin-4.0.0.jar SHA256
 ```
 
 This jar is self-contained and additive: it only defines classes under

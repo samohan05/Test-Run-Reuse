@@ -1,180 +1,58 @@
-
 package com.intland.codebeamer.wiki.plugins.streamreuse;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
-
-import com.intland.codebeamer.persistence.dao.TrackerItemDao;
 import com.intland.codebeamer.persistence.dto.TrackerItemDto;
 
-/**
- * Indexes executable Test Case Run items from a Test Run tracker and applies
- * the LATEST or ALL selection policy.
- *
- * Codebeamer creates a structural parent Test Run and one or more child Test
- * Case Run items. Only child Test Case Run items are eligible for cross-stream
- * reuse. A child execution item is identified by getParent() != null.
- */
 @Component
 public class TestRunSelector {
+    private static final Logger LOG = LogManager.getLogger(TestRunSelector.class);
 
-    private static final Logger LOG =
-            LogManager.getLogger(TestRunSelector.class);
-
-    private final TrackerItemDao trackerItemDao;
-
-    public TestRunSelector(TrackerItemDao trackerItemDao) {
-        this.trackerItemDao = trackerItemDao;
-    }
-
-    public Map<Integer, List<TrackerItemDto>> indexRuns(
-            int trackerId) {
-
-        Map<Integer, List<TrackerItemDto>> runsByTestCaseId =
-                new HashMap<>();
-
-        List<TrackerItemDto> trackerItems =
-                trackerItemDao.findByTracker(trackerId);
-
-        int deletedItems = 0;
-        int structuralParentRuns = 0;
-        int eligibleChildRuns = 0;
-        int malformedReferenceRows = 0;
-
-        if (trackerItems == null) {
-            return runsByTestCaseId;
-        }
-
+    /** Indexes the caller's one-time Test Run tracker load. */
+    public Map<Integer, List<TrackerItemDto>> indexRuns(List<TrackerItemDto> trackerItems) {
+        Map<Integer, List<TrackerItemDto>> runsByTestCaseId = new HashMap<>();
+        int deleted = 0, parents = 0, eligible = 0, malformed = 0;
+        if (trackerItems == null) return runsByTestCaseId;
         for (TrackerItemDto run : trackerItems) {
-            if (run == null) {
-                continue;
-            }
-
-            if (run.isDeleted()) {
-                deletedItems++;
-                continue;
-            }
-
-            /*
-             * A structural parent Test Run has no parent item. The actual
-             * executable Test Case Run is a child item and therefore has a
-             * non-null parent. Exclude the structural parent from eligibility.
-             */
-            if (run.getParent() == null) {
-                structuralParentRuns++;
-                continue;
-            }
-
-            List<Map<Integer, String>> testCaseRows =
-                    run.getTable(0);
-
-            if (testCaseRows == null || testCaseRows.isEmpty()) {
-                continue;
-            }
-
+            if (run == null) continue;
+            if (run.isDeleted()) { deleted++; continue; }
+            if (run.getParent() == null) { parents++; continue; }
+            List<Map<Integer, String>> rows = run.getTable(0);
+            if (rows == null || rows.isEmpty()) continue;
             boolean indexed = false;
-
-            for (int row = 0; row < testCaseRows.size(); row++) {
+            for (int row = 0; row < rows.size(); row++) {
                 try {
-                    Integer testCaseId =
-                            parseLinkedTestCaseId(
-                                    run.getTableCell(0, row, 0));
-
-                    runsByTestCaseId
-                            .computeIfAbsent(
-                                    testCaseId,
-                                    ignored -> new ArrayList<>())
-                            .add(run);
-
+                    Integer testCaseId = parseLinkedTestCaseId(run.getTableCell(0, row, 0));
+                    runsByTestCaseId.computeIfAbsent(testCaseId, ignored -> new ArrayList<>()).add(run);
                     indexed = true;
-
-                } catch (RuntimeException malformedReference) {
-                    malformedReferenceRows++;
-
-                    LOG.debug(
-                            "STREAM_REUSE_SKIPPED_MALFORMED_TEST_CASE_REFERENCE " +
-                                    "testRunId={}, row={}",
-                            run.getId(),
-                            row);
-                }
+                } catch (RuntimeException exception) { malformed++; }
             }
-
-            if (indexed) {
-                eligibleChildRuns++;
-            }
+            if (indexed) eligible++;
         }
-
-        for (List<TrackerItemDto> runs : runsByTestCaseId.values()) {
-            runs.sort(
-                    Comparator.comparing(
-                            TrackerItemDto::getId));
-        }
-
-        LOG.info(
-                "STREAM_REUSE_RUN_INDEX trackerId={}, totalItems={}, " +
-                        "eligibleChildRuns={}, structuralParentRunsExcluded={}, " +
-                        "deletedItemsExcluded={}, malformedReferenceRows={}",
-                trackerId,
-                trackerItems.size(),
-                eligibleChildRuns,
-                structuralParentRuns,
-                deletedItems,
-                malformedReferenceRows);
-
+        for (List<TrackerItemDto> runs : runsByTestCaseId.values()) runs.sort(Comparator.comparing(TrackerItemDto::getId));
+        LOG.info("STREAM_REUSE_RUN_INDEX totalItems={}, eligibleChildRuns={}, structuralParentRunsExcluded={}, deletedItemsExcluded={}, malformedReferenceRows={}", trackerItems.size(), eligible, parents, deleted, malformed);
         return runsByTestCaseId;
     }
 
-    public List<TrackerItemDto> select(
-            List<TrackerItemDto> candidates,
-            ReuseMode mode) {
-
-        if (candidates == null || candidates.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        List<TrackerItemDto> uniqueRuns =
-                new ArrayList<>(
-                        new LinkedHashSet<>(candidates));
-
-        uniqueRuns.sort(
-                Comparator.comparing(
-                        TrackerItemDto::getId));
-
-        if (mode == ReuseMode.ALL) {
-            return uniqueRuns;
-        }
-
-        return Collections.singletonList(
-                uniqueRuns.get(uniqueRuns.size() - 1));
+    public List<TrackerItemDto> select(List<TrackerItemDto> candidates, ReuseMode mode) {
+        if (candidates == null || candidates.isEmpty()) return Collections.emptyList();
+        List<TrackerItemDto> unique = new ArrayList<>(new LinkedHashSet<>(candidates));
+        unique.sort(Comparator.comparing(TrackerItemDto::getId));
+        return mode == ReuseMode.ALL ? unique : Collections.singletonList(unique.get(unique.size() - 1));
     }
 
-    private Integer parseLinkedTestCaseId(String serializedCell) {
-        if (serializedCell == null) {
-            throw new IllegalArgumentException(
-                    "The Test Case reference cell is null.");
-        }
-
-        int dashIndex = serializedCell.indexOf('-');
-        int slashIndex = serializedCell.indexOf('/');
-
-        if (dashIndex < 0 || slashIndex <= dashIndex) {
-            throw new IllegalArgumentException(
-                    "Unexpected Test Case reference cell: " +
-                            serializedCell);
-        }
-
-        return Integer.valueOf(
-                serializedCell.substring(
-                        dashIndex + 1,
-                        slashIndex));
+    private Integer parseLinkedTestCaseId(String cell) {
+        if (cell == null) throw new IllegalArgumentException("Null Test Case reference");
+        int dash = cell.indexOf('-'), slash = cell.indexOf('/', dash + 1);
+        if (dash < 0 || slash <= dash + 1) throw new IllegalArgumentException("Malformed Test Case reference");
+        return Integer.valueOf(cell.substring(dash + 1, slash));
     }
 }

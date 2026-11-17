@@ -1,4 +1,3 @@
-
 package com.intland.codebeamer.wiki.plugins.streamreuse;
 
 import java.time.Instant;
@@ -102,6 +101,15 @@ public final class StreamReuseModels {
         public int evidenceInherited;
         public int evidenceImmediate;
         public int evidenceFallback;
+        // Lightweight mutable execution progress. Updated by StreamReuseJob.
+        public volatile int processedCopies;
+        public volatile int remainingCopies;
+        public volatile Integer currentSourceRunId;
+        public volatile String currentSourceRunName;
+        public volatile Integer currentTargetTestCaseId;
+        public volatile String currentTargetTestCaseName;
+        public volatile String lastError;
+        public volatile Instant lastUpdatedAt = Instant.now();
         public List<ItemResult> results = new ArrayList<>();
 
         public String getOperationId() { return operationId; }
@@ -171,7 +179,15 @@ public final class StreamReuseModels {
         public int getFailedCopies() { return failedCopies; }
         public int getEvidenceInherited() { return evidenceInherited; }
         public int getEvidenceImmediate() { return evidenceImmediate; }
-        public int getEvidenceFallback() { return evidenceFallback; }
+                public int getEvidenceFallback() { return evidenceFallback; }
+        public int getProcessedCopies() { return processedCopies; }
+        public int getRemainingCopies() { return remainingCopies; }
+        public Integer getCurrentSourceRunId() { return currentSourceRunId; }
+        public String getCurrentSourceRunName() { return currentSourceRunName; }
+        public Integer getCurrentTargetTestCaseId() { return currentTargetTestCaseId; }
+        public String getCurrentTargetTestCaseName() { return currentTargetTestCaseName; }
+        public String getLastError() { return lastError; }
+        public Instant getLastUpdatedAt() { return lastUpdatedAt; }
         public List<ItemResult> getResults() { return results; }
     }
 }

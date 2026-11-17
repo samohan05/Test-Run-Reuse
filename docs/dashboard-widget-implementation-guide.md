@@ -1,4 +1,4 @@
-# Stream Test Run Reuse — Dashboard Widget Implementation Guide (v3.0.0 / widget build 1.7.4)
+# Stream Test Run Reuse — Dashboard Widget Implementation Guide (v4.0.0 / widget build 1.7.11)
 
 This is the full narrative implementation guide for the Dashboard Widget front-end, which
 shipped in v3.0.0 alongside the existing Wiki plug-in. Where the
@@ -129,14 +129,14 @@ list.
 ## 6. Target Test Case selection
 
 ```
-GET /cb/api/v3/items/query?page=1&pageSize=500
+GET /cb/api/v3/items/query?page={pickerPage}&pageSize=200
     &queryString=project.id IN ({projectId}) AND tracker.id IN ({targetTrackerId})
 ```
 
-The large modal selector loads physical Test Case items from the selected target tracker
-through Codebeamer's item-query API, constrained by both project and tracker. Up to 500 items
-are requested in the current implementation (see
-[Known limitations](../README.md#known-limitations)).
+The full-screen picker loads physical Test Case items from the selected target tracker through
+Codebeamer's item-query API, constrained by both project and tracker, and server-paged at 200
+items per page (as of build 1.7.11 — see [Appendix F](#appendix-f--widget-ui-version-history-build-1711-progress-normalization-fix));
+selections made on earlier pages persist across page navigation.
 
 ### 6.1 Search and filter behavior
 
@@ -305,7 +305,8 @@ for this front-end specifically:
 | `/cb/api/streamReuse/philips/ping` | GET | Backend health/version |
 | `/cb/api/streamReuse/philips/preview` | POST | Read-only plan |
 | `/cb/api/streamReuse/philips/execute` | POST | Background execution |
-| `/cb/api/streamReuse/philips/status/{operationId}` | GET | Operation polling |
+| `/cb/api/streamReuse/philips/status/{operationId}` | GET | Operation polling (full report) |
+| `/cb/api/streamReuse/philips/status/{operationId}/summary` | GET | Operation polling (lean progress snapshot; widget tries this first, falls back to the full report on `404`) |
 
 ## Appendix C — Status and action reference
 
@@ -343,3 +344,26 @@ widget UI:
   show an em dash.
 - Preserves everything from before: Streams API hierarchy, Folder exclusion, the large picker,
   preview, execution, and status polling.
+
+## Appendix F — Widget UI version history (build 1.7.11, "progress normalization fix")
+
+The HTML build deployed in v4.0.0 ("V1.7.11-progress-normalization-fix") added, on top of
+build 1.7.4:
+
+- The target Test Case picker is server-paged (200 items/page) with Previous/Next controls and
+  "Select all on page" / "Clear all selections", instead of loading up to 500 items in one
+  request; the picker modal now runs full-screen.
+- Clicking **Execute** shows a confirmation dialog (planned copy count, source/target stream
+  names, reuse mode, and an extra warning above 500 planned copies) before calling `/execute`.
+- A live progress overlay during execution: a progress bar; created/already-reused/failed/
+  remaining counts; elapsed time and an estimated-time-remaining calculation; the Test Run and
+  target Test Case currently being processed; and the operation ID.
+- Status polling tries the new lean `GET .../status/{operationId}/summary` endpoint first and
+  falls back to the full `GET .../status/{operationId}` report on `404`. The poll interval is
+  now adaptive — roughly every 3s for the first 30 seconds, every 5s up to 5 minutes, every 10s
+  beyond that, and every 15s whenever the browser tab is hidden — rather than a fixed ~1.2s.
+- The results table gained a filter (All / Created / Already reused / Failed / Planned) and its
+  own pagination (100 rows/page); **Execute** is only enabled while the current filtered view
+  still has plannable (`CREATE`) rows.
+- Preserves everything from build 1.7.4: the project link, the renamed results table and
+  "Outcome / Created Item" column, and linked IDs throughout.

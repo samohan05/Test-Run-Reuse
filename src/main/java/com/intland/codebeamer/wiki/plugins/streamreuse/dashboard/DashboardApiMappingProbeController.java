@@ -4,5 +4,5 @@ import org.springframework.web.bind.annotation.RequestMapping;import org.springf
 @RestController @RequestMapping("/streamReuse/philips")
 public class DashboardApiMappingProbeController {
  @RequestMapping(value="/ping",method=RequestMethod.GET,produces="application/json")
- public Map<String,Object> ping(){Map<String,Object> r=new LinkedHashMap<>();r.put("status","UP");r.put("component","StreamTestRunReuseDashboardBackend");r.put("version","1.2.1");r.put("mapping","/cb/api/streamReuse/philips");r.put("timeFormat","ISO-8601 string");return r;}
+ public Map<String,Object> ping(){Map<String,Object> r=new LinkedHashMap<>();r.put("status","UP");r.put("component","StreamTestRunReuseDashboardBackend");r.put("version","1.3.2");r.put("mapping","/cb/api/streamReuse/philips");r.put("timeFormat","ISO-8601 string");return r;}
 }

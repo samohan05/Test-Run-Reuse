@@ -1,4 +1,3 @@
-
 package com.intland.codebeamer.wiki.plugins.streamreuse;
 
 import java.util.UUID;
@@ -146,5 +145,8 @@ public class StreamReuseFacade {
 
     public StreamReuseModels.Report status(String operationId) {
         return registry.get(operationId);
+    }
+    public OperationRegistry.ProgressSnapshot progress(String operationId) {
+        return registry.progress(operationId);
     }
 }

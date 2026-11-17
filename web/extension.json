@@ -5,9 +5,9 @@
       "externalWidgetConfig": {
         "id": "philips-stream-test-run-reuse-widget",
         "name": "Stream Test Run Reuse",
-        "shortDescription": "Stream-aware Test Run reuse with linked preview and execution results.",
+        "shortDescription": "Stream Test Run reuse with fixed result pagination and resilient execution status polling.",
         "category": "test",
-        "viewUrl": "http://localhost:8080/cb/custom/streamTestRunReuseWidget.html?v=1.7.4",
+        "viewUrl": "http://localhost:8080/cb/custom/streamTestRunReuseWidget.html?v=1.7.11",
         "iconUrl": "http://localhost:8080/cb/custom/menuitem_submenuindicator.png",
         "attributes": {
           "project": {
