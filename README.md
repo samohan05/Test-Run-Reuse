@@ -1,4 +1,4 @@
-# Stream Test Run Reuse — Codebeamer Customization (v4.0.0)
+# Stream Test Run Reuse — Codebeamer Customization (v4.0.1)
 
 A server-side **PTC Codebeamer** customization that performs controlled, bulk **Test Run
 result reuse across streams**. Point it at a source stream and a target stream and it finds
@@ -37,6 +37,7 @@ Both front-ends validate every input server-side and delegate to the exact same
 
 ## Table of contents
 
+- [What changed in v4.0.1](#what-changed-in-v401)
 - [What changed in v4.0.0](#what-changed-in-v400)
 - [What changed in v3.0.0](#what-changed-in-v300)
 - [What changed in v1.2.0](#what-changed-in-v120)
@@ -56,6 +57,26 @@ Both front-ends validate every input server-side and delegate to the exact same
 - [Repository layout](#repository-layout)
 
 ---
+
+## What changed in v4.0.1
+
+Widget-only patch, build `1.7.11-progress-normalization-fix` → `1.7.12-refresh-recovery`. No
+backend or Wiki-plugin change.
+
+If the widget iframe reloaded while an execution was still running — a page refresh, or
+navigating the dashboard away and back — the widget lost all track of the in-flight operation:
+`init()` only re-rendered the form, it never checked whether an execution was still queued or
+running on the server. The user would see the widget reset to its initial state with no
+indication anything was still happening, which could prompt a redundant second execution.
+
+Fixed by persisting the active operation's context (`operationId`, stream names, reuse mode,
+scope, planned copies, start time) to `sessionStorage` under a per-project key as soon as
+`/execute` succeeds. On init, after the catalog loads, the widget now checks for a saved
+operation and, if one exists, immediately shows the progress overlay ("Resuming execution"),
+polls its status (preferring `/status/{id}/summary`, same fallback as before), and either
+finalizes it (if it completed while the widget was away) or resumes normal polling. The saved
+state is cleared once the operation reaches a terminal status. `web/extension.json`'s `viewUrl`
+bumped to `?v=1.7.12`.
 
 ## What changed in v4.0.0
 
@@ -589,7 +610,7 @@ choices made inside the widget, not editor-time attributes:
       "id": "philips-stream-test-run-reuse-widget",
       "name": "Stream Test Run Reuse",
       "category": "test",
-      "viewUrl": "http://localhost:8080/cb/custom/streamTestRunReuseWidget.html?v=1.7.11",
+      "viewUrl": "http://localhost:8080/cb/custom/streamTestRunReuseWidget.html?v=1.7.12",
       "iconUrl": "http://localhost:8080/cb/custom/menuitem_submenuindicator.png",
       "attributes": {
         "project": { "typeName": "project", "fieldLabel": "Project", "required": true, "value": [] }

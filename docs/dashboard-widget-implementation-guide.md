@@ -1,4 +1,4 @@
-# Stream Test Run Reuse — Dashboard Widget Implementation Guide (v4.0.0 / widget build 1.7.11)
+# Stream Test Run Reuse — Dashboard Widget Implementation Guide (v4.0.1 / widget build 1.7.12)
 
 This is the full narrative implementation guide for the Dashboard Widget front-end, which
 shipped in v3.0.0 alongside the existing Wiki plug-in. Where the
@@ -367,3 +367,27 @@ build 1.7.4:
   still has plannable (`CREATE`) rows.
 - Preserves everything from build 1.7.4: the project link, the renamed results table and
   "Outcome / Created Item" column, and linked IDs throughout.
+
+## Appendix G — Widget UI version history (build 1.7.12, "refresh recovery")
+
+The HTML build deployed in v4.0.1 ("V1.7.12-refresh-recovery") fixes a single issue in build
+1.7.11: if the widget iframe reloaded while an execution was still queued or running (a page
+refresh, or navigating the dashboard away and back), the widget lost all track of it — `init()`
+only re-rendered the form and never checked for an in-flight operation, so the user saw the
+widget reset to its initial state with no sign anything was still happening.
+
+- As soon as `/execute` succeeds, the operation's context (`operationId`, stream names, reuse
+  mode, selection scope, planned copies, start time) is saved to `sessionStorage` under a
+  per-project key (`philips.streamReuse.activeOperation.{projectId}`).
+- On init, once the catalog has loaded, the widget checks for a saved operation. If one exists,
+  it immediately shows the progress overlay ("Resuming execution"), polls its status (preferring
+  `GET .../status/{operationId}/summary`, same fallback-to-full-report behavior as build 1.7.11),
+  and either finalizes it (if it completed while the widget was away) or resumes the normal
+  adaptive polling loop from build 1.7.11.
+- The saved `sessionStorage` entry is cleared once the operation reaches a terminal status
+  (`COMPLETED`, `COMPLETED_WITH_ERRORS`, or `FAILED`), whether that happens during normal polling
+  or during recovery.
+- State is per browser tab session only (`sessionStorage`, not a server-side or cross-device
+  mechanism) — it does not change the backend's `OperationRegistry`, which remains the source of
+  truth; this only re-attaches the widget's UI to an operation that's already running.
+- Preserves everything from build 1.7.11.
